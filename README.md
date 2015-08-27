@@ -1,21 +1,29 @@
 # Shaderc
 
+[![Linux Build Status](https://travis-ci.org/google/shaderc.svg)](https://travis-ci.org/google/shaderc "Linux Build Status") [![Windows Build status](https://ci.appveyor.com/api/projects/status/xcxci2mekggib1an?svg=true)](https://ci.appveyor.com/project/antiagainst/shaderc "Windows Build Status")
+
 A collection of tools, libraries and tests for shader compilation.
+At the moment it includes:
+
+- `glslc`, a command line compiler for GLSL to SPIR-V, and
+- `libshaderc` a library API for doing the same.
 
 ## Status
 
 Shaderc is experimental, and subject to significant incompatible changes.
 
-For licensing terms, please see the `LICENSE` file.  If interested in
-contributing to this project, please see `CONTRIBUTING.md`.
+For licensing terms, please see the [`LICENSE`](LICENSE) file.  If interested in
+contributing to this project, please see [`CONTRIBUTING.md`](CONTRIBUTING.md)
 
 This is not an official Google product (experimental or otherwise), it is just
 code that happens to be owned by Google.  That may change if Shaderc gains
-contributions from others.  See the `CONTRIBUTING.md` file for more information.
-See also the `AUTHORS` and `CONTRIBUTORS` files.
+contributions from others.  See the [`CONTRIBUTING.md`](CONTRIBUTING.md) file
+for more information. See also the [`AUTHORS`](AUTHORS) and
+[`CONTRIBUTORS`](CONTRIBUTORS) files.
 
 ## File organization
 
+- `android_test/` : a small Android application to verify compilation
 - `cmake/`: CMake utility functions and configuration for Shaderc
 - `glslc/`: an executable to compile GLSL to SPIR-V
 - `libshaderc/`: a library for compiling shader strings into SPIR-V
@@ -23,9 +31,18 @@ See also the `AUTHORS` and `CONTRIBUTORS` files.
 - `third_party/`: third party open source packages; see below
 - `utils/`: utility scripts for Shaderc
 
-Shaderc depends on a [fork](https://github.com/google/glslang) of the Khronos
-reference GLSL compiler glslang. Shaderc also depends on the testing framework
-[Google Mock](https://code.google.com/p/googlemock/).
+Shaderc depends on `glslang`, the Khronos reference compiler for GLSL.
+Sometimes a change updates both Shaderc and glslang.  In that case the
+glslang change will appear in [google/glslang](https://github.com/google/glslang)
+before it appears upstream in
+[KhronosGroup/glslang](https://github.com/KhronosGroup/glslang).
+We intend to upstream all changes to glslang. We maintain the separate
+copy only to stage those changes for review, and to provide something for
+Shaderc to build against in the meantime.  Please see
+[DEVELOPMENT.howto.md](DEVELOPMENT.howto.md) for more details.
+
+Shaderc also depends on the [Google Mock](https://github.com/google/googlemock)
+testing framework.
 
 In the following sections, `$SOURCE_DIR` is the directory you intend to clone
 Shaderc into.
@@ -37,8 +54,9 @@ Shaderc into.
 ```sh
 git clone https://github.com/google/shaderc $SOURCE_DIR
 cd $SOURCE_DIR/third_party
-svn checkout http://googlemock.googlecode.com/svn/tags/release-1.7.0 \
-    gmock-1.7.0
+git clone -b release-1.7.0 https://github.com/google/googlemock.git gmock-1.7.0
+git clone -b release-1.7.0 https://github.com/google/googletest.git \
+    gmock-1.7.0/gtest
 git clone https://github.com/google/glslang glslang
 cd $SOURCE_DIR/
 ```

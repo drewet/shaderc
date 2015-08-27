@@ -1,6 +1,6 @@
 # Find nosetests; see add_nosetests() from utils.cmake for opting in to
 # nosetests in a specific directory.
-find_program(NOSETESTS_EXE NAMES nosetests)
+find_program(NOSETESTS_EXE NAMES nosetests PATHS $ENV{PYTHON_PACKAGE_PATH})
 if (NOT NOSETESTS_EXE)
   message(STATUS "nosetests was not found - python code will not be tested")
 endif()
@@ -21,10 +21,21 @@ if(WIN32)
   set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 endif(WIN32)
 
+if (ANDROID)
+# For android let's preemptively find the correct packages so that
+# child projects (glslang, googletest) do not fail to find them.
+find_host_program(PYTHON_EXE python REQUIRED)
+find_host_package(PythonInterp)
+find_host_package(BISON)
+else()
 find_program(PYTHON_EXE python REQUIRED)
+endif()
+
+find_program(ECHO_EXE echo REQUIRED)
 
 option(ENABLE_CODE_COVERAGE "Enable collecting code coverage." OFF)
 if (ENABLE_CODE_COVERAGE)
+  message(STATUS "Shaderc: code coverage report is on.")
   if (NOT UNIX)
     message(FATAL_ERROR "Code coverage on non-UNIX system not supported yet.")
   endif()

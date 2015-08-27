@@ -27,7 +27,6 @@ using testing::Each;
 using testing::HasSubstr;
 
 const char kMinimalShader[] = "void main(){}";
-
 TEST(CppInterface, MultipleCalls) {
   shaderc::Compiler compiler1, compiler2, compiler3;
   EXPECT_TRUE(compiler1.IsValid());
@@ -60,16 +59,6 @@ TEST(CppInterface, MultipleThreadsInitializing) {
 bool CompilationSuccess(const shaderc::Compiler& compiler,
                         const std::string& shader, shaderc_shader_kind kind) {
   return compiler.CompileGlslToSpv(shader.c_str(), shader.length(), kind)
-      .GetSuccess();
-}
-
-// Compiles a shader with the given options and returns true on success, false
-// on failure.
-bool CompilationSuccess(const shaderc::Compiler& compiler,
-                        const std::string& shader, shaderc_shader_kind kind,
-                        const shaderc::CompileOptions& options) {
-  return compiler.CompileGlslToSpv(shader.c_str(), shader.length(), kind,
-                                   options)
       .GetSuccess();
 }
 

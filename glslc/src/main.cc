@@ -62,17 +62,19 @@ void PrintHelp(std::ostream* out) {
        << "  -S                Only run preprocess and compilation steps.\n"
        << "  -w                Suppresses all warning messages.\n"
        << "  -Werror           Treat all warnings as errors.\n"
+       << "  -working-directory <dir>\n"
+       << "                    Resolve file paths relative to the specified "
+       << "directory.\n"
        << "  -x <language>     Treat subsequent input files as having type "
        << "<language>.\n"
        << "                    The only supported language is glsl."
        << std::endl;
 }
 
-// Parses the argument for the option at index in argv. On success, returns
-// true and writes the parsed argument into option_argument. Returns false
-// if any error occurs. option is the expected option at argv[index].
-// After calling this function, index will be at the last command line
-// argument consumed.
+// Gets the option argument for the option at *index in argv in a way consistent
+// with clang/gcc. On success, returns true and writes the parsed argument into
+// *option_argument. Returns false if any errors occur. After calling this
+// function, *index will the index of the last command line argument consumed.
 bool GetOptionArgument(int argc, char** argv, int* index,
                        const std::string& option,
                        string_piece* option_argument) {
@@ -82,12 +84,13 @@ bool GetOptionArgument(int argc, char** argv, int* index,
     *option_argument = arg.substr(option.size());
     return true;
   } else {
-    if (++(*index) >= argc) {
-      return false;
-    } else {
-      *option_argument = argv[*index];
+    if (option.back() == '=') {
+      *option_argument = "";
       return true;
     }
+    if (++(*index) >= argc) return false;
+    *option_argument = argv[*index];
+    return true;
   }
 }
 
@@ -116,6 +119,18 @@ int main(int argc, char** argv) {
         return 1;
       }
       compiler.SetOutputFileName(file_name);
+    } else if (arg.starts_with("-working-directory")) {
+      // Following Clang, both -working-directory and -working-directory= are
+      // accepted.
+      std::string option = "-working-directory";
+      if (arg[option.size()] == '=') option = "-working-directory=";
+      string_piece workdir;
+      if (!GetOptionArgument(argc, argv, &i, option, &workdir)) {
+        std::cerr << "glslc: error: argument to '-working-directory' is "
+                     "missing (expected 1 value)"
+                  << std::endl;
+      }
+      compiler.SetWorkingDirectory(workdir.str());
     } else if (arg.starts_with("-fshader-stage=")) {
       const string_piece stage = arg.substr(std::strlen("-fshader-stage="));
       force_shader_stage = glslc::GetShaderStageFromCmdLine(arg);
